@@ -1,0 +1,13 @@
+[package]
+
+name = "wm-daemons"
+version = "0.0.1"
+authors = ["Ben Boeckel <mathstuf@gmail.com>"]
+
+[dependencies.dbus-rs]
+
+git = "https://github.com/diwic/dbus-rs.git"
+
+[dependencies.xdg-rs]
+
+git = "https://github.com/skullzzz/xdg-rs.git"
