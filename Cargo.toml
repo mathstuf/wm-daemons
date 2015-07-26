@@ -1,13 +1,20 @@
-[package]
-
+[project]
 name = "wm-daemons"
 version = "0.0.1"
 authors = ["Ben Boeckel <mathstuf@gmail.com>"]
+license = "BSD"
+description = """
+Daemons to handle the modern D-Bus service desktop.
+"""
 
-[dependencies.dbus-rs]
+[dependencies]
+# TODO: use dbus-bytestream
+dbus = "0.1.1"
+xdg-basedir = "0.2.1"
 
-git = "https://github.com/diwic/dbus-rs.git"
+[lib]
+name = "wm_daemons"
+path = "src/lib.rs"
 
-[dependencies.xdg-rs]
-
-git = "https://github.com/skullzzz/xdg-rs.git"
+[[bin]]
+name = "wm-session-agent"
