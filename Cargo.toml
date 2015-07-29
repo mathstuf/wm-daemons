@@ -8,6 +8,7 @@ Daemons to handle the modern D-Bus service desktop.
 """
 
 [dependencies]
+config = "0.1.1"
 # TODO: use dbus-bytestream
 dbus = "0.1.1"
 xdg-basedir = "0.2.1"
