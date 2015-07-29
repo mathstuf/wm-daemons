@@ -1,5 +1,5 @@
-use dirs::dir_config_create;
-use error::ConfigError;
+use super::dirs::dir_config_create;
+use super::error::ConfigError;
 
 extern crate config;
 use self::config::reader::from_file;

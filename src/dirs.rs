@@ -1,4 +1,4 @@
-use error::FsError;
+use super::error::FsError;
 
 extern crate xdg_basedir;
 
