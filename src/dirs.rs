@@ -1,5 +1,6 @@
-extern crate xdg_basedir;
 use error::FsError;
+
+extern crate xdg_basedir;
 
 use std::fs::create_dir_all;
 use std::path::PathBuf;
