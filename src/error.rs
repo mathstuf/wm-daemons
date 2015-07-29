@@ -62,7 +62,8 @@ impl Error for ConfigError {
     fn description(&self) -> &str {
         match *self {
             FsConfigError(ref fs) => (*fs).description(),
-            ParseConfigError(ref desc) => (*desc).as_str(),
+            // XXX: trim -> as_str
+            ParseConfigError(ref desc) => (*desc).trim(),
         }
     }
 }
@@ -75,7 +76,15 @@ impl From<FsError> for ConfigError {
 
 impl From<ParseError> for ConfigError {
     fn from(config: ParseError) -> ConfigError {
-        let desc: String = config.detail.unwrap_or(String::from_str("unknown parse error"));
-        ParseConfigError(String::from_str(config.desc) + ": " + desc.as_str())
+        // FIXME: Wow, the unstable APIs...
+        let mut default_desc = String::new();
+        default_desc.push_str("unknown parse error");
+        let desc = config.detail.unwrap_or(default_desc);
+        let mut err_string = String::new();
+        err_string.push_str(config.desc);
+        err_string.push_str(": ");
+        // XXX: trim -> as_str
+        err_string.push_str(desc.trim());
+        ParseConfigError(err_string)
     }
 }
