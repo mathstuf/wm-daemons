@@ -28,16 +28,18 @@ fn try_main() -> Result<(), Box<Error>> {
 
     let cbs: CallbackMap<Config> = vec![
         (make_signal_info(
-            "org.freedesktop.login1.Session",
             "/org/freedesktop/login1/session/_33",
+            "org.freedesktop.login1.Session",
             "Lock",
         ), handle_signal),
         (make_signal_info(
-            "org.freedesktop.login1.Session",
             "/org/freedesktop/login1/session/_33",
+            "org.freedesktop.login1.Session",
             "Unlock",
         ), handle_signal),
     ];
+
+    try!(conn.add_match("type='signal'"));
 
     for items in conn.iter(100) {
         match_signal(items, &cbs, &conf);
