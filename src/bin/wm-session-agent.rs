@@ -1,6 +1,6 @@
 extern crate wm_daemons;
 use wm_daemons::config::load_config;
-use wm_daemons::dbus_listen::{CallbackMap, SignalInfo, match_signal, make_signal_info};
+use wm_daemons::dbus_listen::{CallbackMap, SignalInfo, match_signal};
 
 extern crate config;
 use self::config::types::Config;
@@ -27,19 +27,20 @@ fn try_main() -> Result<(), Box<Error>> {
     let conn = try!(Connection::get_private(BusType::System));
 
     let cbs: CallbackMap<Config> = vec![
-        (make_signal_info(
-            "/org/freedesktop/login1/session/_33",
-            "org.freedesktop.login1.Session",
-            "Lock",
-        ), handle_signal),
-        (make_signal_info(
-            "/org/freedesktop/login1/session/_33",
-            "org.freedesktop.login1.Session",
-            "Unlock",
-        ), handle_signal),
+        (SignalInfo {
+            path: None,
+            object: None,
+            member: Some("Lock".to_string()),
+        }, handle_signal),
+        (SignalInfo {
+            path: None,
+            object: None,
+            member: Some("Unlock".to_string()),
+        }, handle_signal),
     ];
 
-    try!(conn.add_match("type='signal'"));
+    let match_str = format!("type='signal',interface='org.freedesktop.login1.Session',path='{}'", spath);
+    try!(conn.add_match(&match_str[..]));
 
     for items in conn.iter(100) {
         match_signal(items, &cbs, &conf);
