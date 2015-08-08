@@ -29,6 +29,6 @@ impl Error for WrapConfigError {
 impl From<ConfigError> for WrapConfigError {
     fn from(config: ConfigError) -> WrapConfigError {
         let default_desc = format!("unknown parse error");
-        CError(format!("{}: {}", config.desc, config.detail.unwrap_or(default_desc)))
+        CError(format!("{:?} {}: {}", config.kind, config.desc, config.detail.unwrap_or(default_desc)))
     }
 }
