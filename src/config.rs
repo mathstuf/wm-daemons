@@ -2,16 +2,21 @@ use super::dirs::dir_config_create;
 use super::error::WrapConfigError;
 
 extern crate config;
-use self::config::reader::from_file;
+use self::config::reader::{from_file, from_stream};
 use self::config::types::{Config, SettingsList};
 
 use std::error::Error;
 use std::fs::metadata;
+use std::io::stdin;
 use std::path::Path;
 
 // Fix this craziness. Waiting on https://github.com/filipegoncalves/rust-config/issues/2.
 fn wrap_from_file(path: &Path) -> Result<Config, WrapConfigError> {
-    Ok(try!(from_file(path)))
+    Ok(try!(if path.to_str() == Some("-") {
+        from_stream(&mut stdin())
+    } else {
+        from_file(path)
+    }))
 }
 
 pub fn load_config(app: &str, file: &str) -> Result<Config, Box<Error>> {
