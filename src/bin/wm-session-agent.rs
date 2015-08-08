@@ -1,6 +1,7 @@
 extern crate wm_daemons;
 use wm_daemons::config::{load_config, load_config_path};
 use wm_daemons::dbus_listen::{CallbackMap, SignalInfo, match_signal};
+use wm_daemons::exec::run_config_program;
 
 #[macro_use]
 extern crate clap;
@@ -16,7 +17,11 @@ use std::error::Error;
 use std::path::Path;
 
 fn run_program(action: &str, conf: &Config) -> () {
-    // TODO
+    let path = format!("actions.{}", action);
+    let res = run_config_program(conf, &path[..]);
+    if res.is_err() {
+        println!("failed to handle '{}' action: {}", action, res.err().unwrap());
+    }
 }
 
 fn handle_signal(info: &SignalInfo, conf: &Config) -> () {
