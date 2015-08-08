@@ -51,9 +51,9 @@ fn try_main() -> Result<(), Box<Error>> {
         .get_matches();
 
     let conf = try!(if matches.is_present("CONFIG") {
-            load_config("wm-session-agent", "config")
-        } else {
             load_config_path(Path::new(matches.value_of("CONFIG").unwrap()))
+        } else {
+            load_config("wm-session-agent", "config")
         });
 
     let sid = matches.value_of("SESSION").unwrap();
