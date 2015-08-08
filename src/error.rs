@@ -21,23 +21,14 @@ impl fmt::Display for WrapConfigError {
 impl Error for WrapConfigError {
     fn description(&self) -> &str {
         match *self {
-            // XXX: trim -> as_str
-            CError(ref desc) => (*desc).trim(),
+            CError(ref desc) => &(*desc)[..],
         }
     }
 }
 
 impl From<ConfigError> for WrapConfigError {
     fn from(config: ConfigError) -> WrapConfigError {
-        // FIXME: Wow, the unstable APIs...
-        let mut default_desc = String::new();
-        default_desc.push_str("unknown parse error");
-        let desc = config.detail.unwrap_or(default_desc);
-        let mut err_string = String::new();
-        err_string.push_str(config.desc);
-        err_string.push_str(": ");
-        // XXX: trim -> as_str
-        err_string.push_str(desc.trim());
-        CError(err_string)
+        let default_desc = format!("unknown parse error");
+        CError(format!("{}: {}", config.desc, config.detail.unwrap_or(default_desc)))
     }
 }
