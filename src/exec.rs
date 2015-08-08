@@ -1,7 +1,19 @@
 extern crate config;
 use self::config::types::{Config, ScalarValue, Value};
 
+use std::env::home_dir;
 use std::process::Command;
+
+fn expand_home(path: &String) -> String {
+    if path.starts_with("~/") {
+        match home_dir() {
+            Some(home) => format!("{}/{}", home.display(), &path[2..]),
+            _ => format!("{}", path)
+        }
+    } else {
+        format!("{}", path)
+    }
+}
 
 fn make_command_vec(vec: &Vec<Value>) -> Result<Command, String> {
     if vec.is_empty() {
@@ -26,7 +38,7 @@ fn make_command_vec(vec: &Vec<Value>) -> Result<Command, String> {
     }
 
     let (prog, args) = prog_args.split_at(1);
-    let mut cmd = Command::new(prog[0]);
+    let mut cmd = Command::new(expand_home(prog[0]));
     cmd.args(args);
 
     Ok(cmd)
@@ -36,7 +48,7 @@ fn make_command_str(string: &String) -> Result<Command, String> {
     if string.is_empty() {
         Err(format!("empty execution string"))
     } else {
-        Ok(Command::new(string))
+        Ok(Command::new(expand_home(string)))
     }
 }
 
