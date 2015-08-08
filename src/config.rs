@@ -17,8 +17,11 @@ fn wrap_from_file(path: &Path) -> Result<Config, WrapConfigError> {
 pub fn load_config(app: &str, file: &str) -> Result<Config, Box<Error>> {
     let mut path_buf = try!(dir_config_create(app));
     path_buf.push(file);
-    let path = path_buf.as_path();
 
+    load_config_path(path_buf.as_path())
+}
+
+pub fn load_config_path(path: &Path) -> Result<Config, Box<Error>> {
     if metadata(path).ok().map_or(false, |m| m.is_file()) {
         let config = try!(wrap_from_file(path));
         Ok(config)
