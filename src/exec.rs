@@ -8,10 +8,10 @@ fn expand_home(path: &String) -> String {
     if path.starts_with("~/") {
         match home_dir() {
             Some(home) => format!("{}/{}", home.display(), &path[2..]),
-            _ => format!("{}", path)
+            _ => path.clone()
         }
     } else {
-        format!("{}", path)
+        path.clone()
     }
 }
 
