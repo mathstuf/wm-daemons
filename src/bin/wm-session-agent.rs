@@ -40,7 +40,7 @@ fn try_main() -> Result<(), Box<Error>> {
         .arg(Arg::with_name("CONFIG")
                 .short("c")
                 .long("config")
-                .help("Path to the configuration value")
+                .help("Path to the configuration file")
                 .takes_value(true))
         .arg(Arg::with_name("SESSION")
                 .short("s")
