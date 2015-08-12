@@ -24,12 +24,14 @@ fn run_program(action: &str, conf: &Config) -> () {
     }
 }
 
-fn handle_signal(info: &SignalInfo, conf: &Config) -> () {
+fn handle_signal(conf: Config, info: &SignalInfo) -> Config {
     if info.member == Some("Lock".to_string()) {
-        run_program("lock", conf);
+        run_program("lock", &conf);
     } else if info.member == Some("Unlock".to_string()) {
-        run_program("unlock", conf);
+        run_program("unlock", &conf);
     }
+
+    conf
 }
 
 fn try_main() -> Result<(), Box<Error>> {
@@ -77,9 +79,9 @@ fn try_main() -> Result<(), Box<Error>> {
     let match_str = format!("type='signal',interface='org.freedesktop.login1.Session',path='{}'", spath);
     try!(conn.add_match(&match_str[..]));
 
-    for items in conn.iter(100) {
-        match_signal(items, &cbs, &conf);
-    }
+    conn.iter(100).fold(conf, |inner_conf, item| {
+        match_signal(inner_conf, &cbs, item)
+    });
 
     Ok(())
 }

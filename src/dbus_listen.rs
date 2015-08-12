@@ -9,7 +9,7 @@ pub struct SignalInfo {
     pub member: Option<String>,
 }
 
-pub type CallbackMap<Ctx> = Vec<(SignalInfo, fn(&SignalInfo, &Ctx) -> ())>;
+pub type CallbackMap<Ctx> = Vec<(SignalInfo, fn(Ctx, &SignalInfo) -> Ctx)>;
 
 fn cmp_option<T: Eq>(a: &Option<T>, b: &Option<T>) -> bool {
     a.is_none() || a == b
@@ -21,30 +21,32 @@ fn match_info(info: &SignalInfo, expect: &SignalInfo) -> bool {
     cmp_option(&expect.member, &info.member)
 }
 
-fn handle_message<Ctx>(msg: Message, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
+fn handle_message<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, msg: Message) -> Ctx {
     let (_, p, o, m) = msg.headers();
     let info = SignalInfo { path: p, object: o, member: m };
 
-    for cb_item in (*map).iter() {
-        let (ref expect, ref cb) = *cb_item;
+    (*map).iter().fold(ctx, |old, ref item| {
+        let (ref expect, ref cb) = **item;
 
         if match_info(&info, expect) {
-            cb(&info, ctx);
+            cb(old, &info)
+        } else {
+            old
         }
+    })
+}
+
+pub fn match_method<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem) -> Ctx {
+    match item {
+        ConnectionItem::MethodCall(m) => handle_message(ctx, map, m),
+        _ => ctx
     }
 }
 
-pub fn match_method<Ctx>(item: ConnectionItem, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
+pub fn match_signal<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem) -> Ctx {
     match item {
-        ConnectionItem::MethodCall(m) => handle_message(m, map, ctx),
-        _ => ()
-    }
-}
-
-pub fn match_signal<Ctx>(item: ConnectionItem, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
-    match item {
-        ConnectionItem::Signal(s) => handle_message(s, map, ctx),
-        _ => ()
+        ConnectionItem::Signal(s) => handle_message(ctx, map, s),
+        _ => ctx
     }
 }
 
