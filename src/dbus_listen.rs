@@ -34,9 +34,15 @@ fn handle_message<Ctx>(msg: Message, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
     }
 }
 
-pub fn match_signal<Ctx>(item: ConnectionItem, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
+pub fn match_method<Ctx>(item: ConnectionItem, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
     match item {
         ConnectionItem::MethodCall(m) => handle_message(m, map, ctx),
+        _ => ()
+    }
+}
+
+pub fn match_signal<Ctx>(item: ConnectionItem, map: &CallbackMap<Ctx>, ctx: &Ctx) -> () {
+    match item {
         ConnectionItem::Signal(s) => handle_message(s, map, ctx),
         _ => ()
     }
