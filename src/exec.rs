@@ -4,6 +4,11 @@ use self::config::types::{Config, ScalarValue, Value};
 use std::env::home_dir;
 use std::process::Command;
 
+pub struct CommandLine {
+    program: String,
+    args: Vec<String>,
+}
+
 fn expand_home(path: &String) -> String {
     if path.starts_with("~/") {
         match home_dir() {
@@ -15,7 +20,7 @@ fn expand_home(path: &String) -> String {
     }
 }
 
-fn make_command_vec(vec: &Vec<Value>) -> Result<Command, String> {
+fn make_command_vec(vec: &Vec<Value>) -> Result<CommandLine, String> {
     if vec.is_empty() {
         return Err(format!("empty execution vector"));
     }
@@ -38,27 +43,31 @@ fn make_command_vec(vec: &Vec<Value>) -> Result<Command, String> {
     }
 
     let (prog, args) = prog_args.split_at(1);
-    let mut cmd = Command::new(expand_home(prog[0]));
-    cmd.args(args);
-
-    Ok(cmd)
+    Ok(CommandLine {
+        program: expand_home(prog[0]),
+        // XXX: Why does .cloned() not work?
+        args: args.iter().map(|&arg| (*arg).clone()).collect(),
+    })
 }
 
-fn make_command_str(string: &String) -> Result<Command, String> {
+fn make_command_str(string: &String) -> Result<CommandLine, String> {
     if string.is_empty() {
         Err(format!("empty execution string"))
     } else {
-        Ok(Command::new(expand_home(string)))
+        Ok(CommandLine {
+            program: expand_home(string),
+            args: vec![],
+        })
     }
 }
 
-pub fn run_config_program(conf: &Config, path: &str) -> Result<(), String> {
+pub fn read_command_line_from_config(conf: &Config, path: &str) -> Option<CommandLine> {
     let val = conf.lookup(path);
     if val.is_none() {
-        return Ok(());
+        return None;
     }
 
-    let cmd = try!(match val.unwrap() {
+    let cmd_line = match val.unwrap() {
         &Value::Array(ref a) => make_command_vec(a),
         &Value::Svalue(ref sv) => {
             match sv {
@@ -67,7 +76,18 @@ pub fn run_config_program(conf: &Config, path: &str) -> Result<(), String> {
             }
         },
         _ => Err(format!("unsupported type for {}", path))
-    }).output();
+    };
+
+    if cmd_line.is_err() {
+        println!("Failed to make a command line for '{}': {:?}", path, cmd_line.as_ref().err());
+    }
+    cmd_line.ok()
+}
+
+pub fn run_command_line(cmd_line: &CommandLine) -> Result<(), String> {
+    let cmd = Command::new(&cmd_line.program)
+                .args(&cmd_line.args)
+                .output();
 
     match cmd {
         Ok(output) => {

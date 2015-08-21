@@ -1,14 +1,11 @@
 extern crate wm_daemons;
 use wm_daemons::config::{load_config, load_config_path};
 use wm_daemons::dbus_listen::{CallbackMap, SignalInfo, match_signal};
-use wm_daemons::exec::run_config_program;
+use wm_daemons::exec::{CommandLine, read_command_line_from_config, run_command_line};
 
 #[macro_use]
 extern crate clap;
 use clap::{Arg, App};
-
-extern crate config;
-use self::config::types::Config;
 
 extern crate dbus;
 use self::dbus::{Connection, BusType};
@@ -16,22 +13,28 @@ use self::dbus::{Connection, BusType};
 use std::error::Error;
 use std::path::Path;
 
-fn run_program(action: &str, conf: &Config) -> () {
-    let path = format!("actions.{}", action);
-    let res = run_config_program(conf, &path[..]);
-    if res.is_err() {
-        println!("failed to handle '{}' action: {}", action, res.err().unwrap());
-    }
+struct Context {
+    on_lock: Option<CommandLine>,
+    on_unlock: Option<CommandLine>,
 }
 
-fn handle_signal(conf: Config, info: &SignalInfo) -> Config {
+fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
+    cmd_line.as_ref().map(|ref cmd| {
+        let res = run_command_line(&cmd);
+        if res.is_err() {
+            println!("failed to handle '{}' action: {}", action, res.err().unwrap());
+        }
+    });
+}
+
+fn handle_signal<'a>(ctx: &'a Context, info: &SignalInfo) -> &'a Context {
     if info.member == Some("Lock".to_string()) {
-        run_program("lock", &conf);
+        run_program("lock", &ctx.on_lock);
     } else if info.member == Some("Unlock".to_string()) {
-        run_program("unlock", &conf);
+        run_program("unlock", &ctx.on_unlock);
     }
 
-    conf
+    ctx
 }
 
 fn try_main() -> Result<(), Box<Error>> {
@@ -57,13 +60,17 @@ fn try_main() -> Result<(), Box<Error>> {
         } else {
             load_config("wm-session-agent", "config")
         });
+    let ctx = Context {
+        on_lock: read_command_line_from_config(&conf, "actions.lock"),
+        on_unlock: read_command_line_from_config(&conf, "actions.unlock"),
+    };
 
     let sid = matches.value_of("SESSION").unwrap();
     let spath = format!("/org/freedesktop/login1/session/_{}", sid);
 
     let conn = try!(Connection::get_private(BusType::System));
 
-    let cbs: CallbackMap<Config> = vec![
+    let cbs: CallbackMap<&Context> = vec![
         (SignalInfo {
             path: None,
             object: None,
@@ -79,8 +86,8 @@ fn try_main() -> Result<(), Box<Error>> {
     let match_str = format!("type='signal',interface='org.freedesktop.login1.Session',path='{}'", spath);
     try!(conn.add_match(&match_str[..]));
 
-    conn.iter(100).fold(conf, |inner_conf, item| {
-        match_signal(inner_conf, &cbs, item)
+    conn.iter(100).fold(&ctx, |inner_ctx, item| {
+        match_signal(inner_ctx, &cbs, item)
     });
 
     Ok(())
