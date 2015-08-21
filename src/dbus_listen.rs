@@ -9,7 +9,7 @@ pub struct DBusInfo {
     pub member: Option<String>,
 }
 
-pub type CallbackMap<Ctx> = Vec<(DBusInfo, fn(Ctx, &DBusInfo) -> Ctx)>;
+pub type CallbackMap<Ctx> = Vec<(DBusInfo, fn(Ctx, &Message) -> Ctx)>;
 
 fn cmp_option<T: Eq>(a: &Option<T>, b: &Option<T>) -> bool {
     a.is_none() || a == b
@@ -29,7 +29,7 @@ fn handle_message<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, msg: Message) -> Ctx {
         let (ref expect, ref cb) = **item;
 
         if match_info(&info, expect) {
-            cb(old, &info)
+            cb(old, &msg)
         } else {
             old
         }

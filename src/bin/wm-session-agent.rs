@@ -8,7 +8,7 @@ extern crate clap;
 use clap::{Arg, App};
 
 extern crate dbus;
-use self::dbus::{Connection, BusType};
+use self::dbus::{Connection, BusType, Message};
 
 use std::error::Error;
 use std::path::Path;
@@ -27,12 +27,16 @@ fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
     });
 }
 
-fn handle_signal(ctx: Context, info: &DBusInfo) -> Context {
-    if info.member == Some("Lock".to_string()) {
-        run_program("lock", &ctx.on_lock);
-    } else if info.member == Some("Unlock".to_string()) {
-        run_program("unlock", &ctx.on_unlock);
-    }
+fn handle_signal(ctx: Context, info: &Message) -> Context {
+    let (_, _, _, member) = info.headers();
+
+    member.map(|member_name| {
+        if member_name == "Lock" {
+            run_program("lock", &ctx.on_lock);
+        } else if member_name == "Unlock" {
+            run_program("unlock", &ctx.on_unlock);
+        }
+    });
 
     ctx
 }
