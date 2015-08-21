@@ -27,7 +27,7 @@ fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
     });
 }
 
-fn handle_signal<'a>(ctx: &'a Context, info: &SignalInfo) -> &'a Context {
+fn handle_signal(ctx: Context, info: &SignalInfo) -> Context {
     if info.member == Some("Lock".to_string()) {
         run_program("lock", &ctx.on_lock);
     } else if info.member == Some("Unlock".to_string()) {
@@ -70,7 +70,7 @@ fn try_main() -> Result<(), Box<Error>> {
 
     let conn = try!(Connection::get_private(BusType::System));
 
-    let cbs: CallbackMap<&Context> = vec![
+    let cbs: CallbackMap<Context> = vec![
         (SignalInfo {
             path: None,
             object: None,
@@ -86,7 +86,7 @@ fn try_main() -> Result<(), Box<Error>> {
     let match_str = format!("type='signal',interface='org.freedesktop.login1.Session',path='{}'", spath);
     try!(conn.add_match(&match_str[..]));
 
-    conn.iter(100).fold(&ctx, |inner_ctx, item| {
+    conn.iter(100).fold(ctx, |inner_ctx, item| {
         match_signal(inner_ctx, &cbs, item)
     });
 
