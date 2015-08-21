@@ -3,19 +3,19 @@ use self::dbus::{ConnectionItem, Message};
 
 use std::vec::Vec;
 
-pub struct SignalInfo {
+pub struct DBusInfo {
     pub path: Option<String>,
     pub object: Option<String>,
     pub member: Option<String>,
 }
 
-pub type CallbackMap<Ctx> = Vec<(SignalInfo, fn(Ctx, &SignalInfo) -> Ctx)>;
+pub type CallbackMap<Ctx> = Vec<(DBusInfo, fn(Ctx, &DBusInfo) -> Ctx)>;
 
 fn cmp_option<T: Eq>(a: &Option<T>, b: &Option<T>) -> bool {
     a.is_none() || a == b
 }
 
-fn match_info(info: &SignalInfo, expect: &SignalInfo) -> bool {
+fn match_info(info: &DBusInfo, expect: &DBusInfo) -> bool {
     cmp_option(&expect.path, &info.path) &&
     cmp_option(&expect.object, &info.object) &&
     cmp_option(&expect.member, &info.member)
@@ -23,7 +23,7 @@ fn match_info(info: &SignalInfo, expect: &SignalInfo) -> bool {
 
 fn handle_message<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, msg: Message) -> Ctx {
     let (_, p, o, m) = msg.headers();
-    let info = SignalInfo { path: p, object: o, member: m };
+    let info = DBusInfo { path: p, object: o, member: m };
 
     (*map).iter().fold(ctx, |old, ref item| {
         let (ref expect, ref cb) = **item;
@@ -50,8 +50,8 @@ pub fn match_signal<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem)
     }
 }
 
-pub fn make_signal_info(path: &str, object: &str, member: &str) -> SignalInfo {
-    SignalInfo {
+pub fn make_signal_info(path: &str, object: &str, member: &str) -> DBusInfo {
+    DBusInfo {
         path: Some(path.to_string()),
         object: Some(object.to_string()),
         member: Some(member.to_string()),

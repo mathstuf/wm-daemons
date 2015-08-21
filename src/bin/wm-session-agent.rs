@@ -1,6 +1,6 @@
 extern crate wm_daemons;
 use wm_daemons::config::{load_config, load_config_path};
-use wm_daemons::dbus_listen::{CallbackMap, SignalInfo, match_signal};
+use wm_daemons::dbus_listen::{CallbackMap, DBusInfo, match_signal};
 use wm_daemons::exec::{CommandLine, read_command_line_from_config, run_command_line};
 
 #[macro_use]
@@ -27,7 +27,7 @@ fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
     });
 }
 
-fn handle_signal(ctx: Context, info: &SignalInfo) -> Context {
+fn handle_signal(ctx: Context, info: &DBusInfo) -> Context {
     if info.member == Some("Lock".to_string()) {
         run_program("lock", &ctx.on_lock);
     } else if info.member == Some("Unlock".to_string()) {
@@ -71,12 +71,12 @@ fn try_main() -> Result<(), Box<Error>> {
     let conn = try!(Connection::get_private(BusType::System));
 
     let cbs: CallbackMap<Context> = vec![
-        (SignalInfo {
+        (DBusInfo {
             path: None,
             object: None,
             member: Some("Lock".to_string()),
         }, handle_signal),
-        (SignalInfo {
+        (DBusInfo {
             path: None,
             object: None,
             member: Some("Unlock".to_string()),
