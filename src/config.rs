@@ -1,5 +1,4 @@
 use super::dirs::dir_config_create;
-use super::error::WrapConfigError;
 
 extern crate config;
 use self::config::reader::{from_file, from_stream};
@@ -11,7 +10,7 @@ use std::io::stdin;
 use std::path::Path;
 
 // Fix this craziness. Waiting on https://github.com/filipegoncalves/rust-config/issues/2.
-fn wrap_from_file(path: &Path) -> Result<Config, WrapConfigError> {
+fn wrap_from_file(path: &Path) -> Result<Config, Box<Error>> {
     Ok(try!(if path.to_str() == Some("-") {
         from_stream(&mut stdin())
     } else {
