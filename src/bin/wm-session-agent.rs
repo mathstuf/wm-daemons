@@ -10,6 +10,7 @@ use clap::{Arg, App};
 extern crate dbus;
 use self::dbus::{Connection, BusType, Message};
 
+use std::env::var;
 use std::error::Error;
 use std::path::Path;
 
@@ -54,7 +55,6 @@ fn try_main() -> Result<(), Box<Error>> {
         .arg(Arg::with_name("SESSION")
                 .short("s")
                 .long("session")
-                .required(true)
                 .help("Session ID to listen on")
                 .takes_value(true))
         .get_matches();
@@ -69,7 +69,16 @@ fn try_main() -> Result<(), Box<Error>> {
         on_unlock: read_command_line_from_config(&conf, "actions.unlock"),
     };
 
-    let sid = matches.value_of("SESSION").unwrap();
+    let sid = match matches.value_of("SESSION") {
+        Some(sid) => sid.to_string(),
+        None => match var("XDG_SESSION_ID") {
+            Ok(sid) => sid,
+            Err(err) => {
+                println!("No session ID given or available: {}", err);
+                return Err(Box::new(err));
+            },
+        },
+    };
     let spath = format!("/org/freedesktop/login1/session/_{}", sid);
 
     let conn = try!(Connection::get_private(BusType::System));
