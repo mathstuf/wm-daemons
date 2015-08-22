@@ -39,14 +39,14 @@ fn handle_message<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, msg: Message) -> Ctx {
 pub fn match_method<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem) -> Ctx {
     match item {
         ConnectionItem::MethodCall(m) => handle_message(ctx, map, m),
-        _ => ctx
+        _ => ctx,
     }
 }
 
 pub fn match_signal<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem) -> Ctx {
     match item {
         ConnectionItem::Signal(s) => handle_message(ctx, map, s),
-        _ => ctx
+        _ => ctx,
     }
 }
 

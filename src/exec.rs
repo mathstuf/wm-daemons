@@ -13,7 +13,7 @@ fn expand_home(path: &String) -> String {
     if path.starts_with("~/") {
         match home_dir() {
             Some(home) => format!("{}/{}", home.display(), &path[2..]),
-            _ => path.clone()
+            _ => path.clone(),
         }
     } else {
         path.clone()
@@ -28,17 +28,12 @@ fn make_command_vec(vec: &Vec<Value>) -> Result<CommandLine, String> {
     let mut prog_args = vec![];
     for v in vec {
         match v {
-            &Value::Svalue(ref sv) => {
+            &Value::Svalue(ref sv) =>
                 match sv {
                     &ScalarValue::Str(ref s) => prog_args.push(s),
-                    _ => {
-                        return Err(format!("non-string program value"));
-                    }
-                }
-            },
-            _ => {
-                return Err(format!("non-string program value"));
-            }
+                    _ => return Err(format!("non-string program value")),
+                },
+            _ => return Err(format!("non-string program value")),
         }
     }
 
@@ -69,13 +64,12 @@ pub fn read_command_line_from_config(conf: &Config, path: &str) -> Option<Comman
 
     let cmd_line = match val.unwrap() {
         &Value::Array(ref a) => make_command_vec(a),
-        &Value::Svalue(ref sv) => {
+        &Value::Svalue(ref sv) =>
             match sv {
                 &ScalarValue::Str(ref s) => make_command_str(s),
-                _ => Err(format!("unsupported type for {}", path))
-            }
-        },
-        _ => Err(format!("unsupported type for {}", path))
+                _ => Err(format!("unsupported type for {}", path)),
+            },
+        _ => Err(format!("unsupported type for {}", path)),
     };
 
     if cmd_line.is_err() {
@@ -90,7 +84,7 @@ pub fn run_command_line(cmd_line: &CommandLine) -> Result<(), String> {
                 .output();
 
     match cmd {
-        Ok(output) => {
+        Ok(output) =>
             if output.status.success() {
                 Ok(())
             } else {
@@ -98,8 +92,7 @@ pub fn run_command_line(cmd_line: &CommandLine) -> Result<(), String> {
                             output.status.code(),
                             String::from_utf8_lossy(&output.stdout),
                             String::from_utf8_lossy(&output.stderr)))
-            }
-        },
-        _ => Err(format!("failed to execute process"))
+            },
+        _ => Err(format!("failed to execute process")),
     }
 }
