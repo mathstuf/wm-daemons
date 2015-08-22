@@ -57,25 +57,21 @@ fn make_command_str(string: &String) -> Result<CommandLine, String> {
 }
 
 pub fn read_command_line_from_config(conf: &Config, path: &str) -> Option<CommandLine> {
-    let val = conf.lookup(path);
-    if val.is_none() {
-        return None;
-    }
+    conf.lookup(path).and_then(|val| {
+        let cmd_line = match val {
+            &Value::Array(ref a) => make_command_vec(a),
+            &Value::Svalue(ref sv) =>
+                match sv {
+                    &ScalarValue::Str(ref s) => make_command_str(s),
+                    _ => Err(format!("unsupported type for {}", path)),
+                },
+            _ => Err(format!("unsupported type for {}", path)),
+        };
 
-    let cmd_line = match val.unwrap() {
-        &Value::Array(ref a) => make_command_vec(a),
-        &Value::Svalue(ref sv) =>
-            match sv {
-                &ScalarValue::Str(ref s) => make_command_str(s),
-                _ => Err(format!("unsupported type for {}", path)),
-            },
-        _ => Err(format!("unsupported type for {}", path)),
-    };
-
-    if cmd_line.is_err() {
-        println!("Failed to make a command line for '{}': {:?}", path, cmd_line.as_ref().err());
-    }
-    cmd_line.ok()
+        cmd_line.map_err(|err| {
+            println!("Failed to make a command line for '{}': {:?}", path, err);
+        }).ok()
+    })
 }
 
 pub fn run_command_line(cmd_line: &CommandLine) -> Result<(), String> {

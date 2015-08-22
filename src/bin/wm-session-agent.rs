@@ -22,9 +22,9 @@ struct Context {
 fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
     cmd_line.as_ref().map(|ref cmd| {
         let res = run_command_line(&cmd);
-        if res.is_err() {
-            println!("failed to handle '{}' action: {}", action, res.err().unwrap());
-        }
+        res.unwrap_or_else(|err| {
+            println!("failed to handle '{}' action: {}", action, err);
+        });
     });
 }
 
@@ -59,11 +59,10 @@ fn try_main() -> Result<(), Box<Error>> {
                 .takes_value(true))
         .get_matches();
 
-    let conf = try!(if matches.is_present("CONFIG") {
-            load_config_path(Path::new(matches.value_of("CONFIG").unwrap()))
-        } else {
-            load_config("wm-session-agent", "config")
-        });
+    let conf = try!(match matches.value_of("CONFIG") {
+        Some(path) => load_config_path(Path::new(path)),
+        None => load_config("wm-session-agent", "config"),
+    });
     let ctx = Context {
         on_lock: read_command_line_from_config(&conf, "actions.lock"),
         on_unlock: read_command_line_from_config(&conf, "actions.unlock"),
