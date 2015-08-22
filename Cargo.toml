@@ -15,8 +15,7 @@ dbus = "0.1.1"
 xdg-basedir = "~0.2.0"
 
 [dependencies.config]
-git = "https://github.com/mathstuf/rust-config.git"
-branch = "next"
+git = "https://github.com/filipegoncalves/rust-config.git"
 
 [lib]
 name = "wm_daemons"
