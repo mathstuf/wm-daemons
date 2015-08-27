@@ -21,10 +21,9 @@ struct Context {
 
 fn run_program(action: &str, cmd_line: &Option<CommandLine>) -> () {
     cmd_line.as_ref().map(|ref cmd| {
-        let res = run_command_line(&cmd);
-        res.unwrap_or_else(|err| {
-            println!("failed to handle '{}' action: {}", action, err);
-        });
+        let _ = run_command_line(&cmd).map_err(|err| {
+                println!("failed to handle '{}' action: {}", action, err);
+            });
     });
 }
 
