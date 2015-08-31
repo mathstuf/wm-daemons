@@ -69,7 +69,7 @@ fn try_main() -> Result<(), Box<Error>> {
 
     let sid = match matches.value_of("SESSION") {
         Some(sid) => sid.to_string(),
-        None => match var("XDG_SESSION_ID") {
+        None => match var("LOGIND_SESSION_ID") {
             Ok(sid) => sid,
             Err(err) => {
                 println!("No session ID given or available: {}", err);
@@ -77,7 +77,7 @@ fn try_main() -> Result<(), Box<Error>> {
             },
         },
     };
-    let spath = format!("/org/freedesktop/login1/session/_{}", sid);
+    let spath = format!("/org/freedesktop/login1/session/{}", sid);
 
     let conn = try!(Connection::get_private(BusType::System));
 
