@@ -43,7 +43,7 @@ fn handle_signal(ctx: Context, info: &Message) -> Context {
 
 fn try_main() -> Result<(), Box<Error>> {
     let matches = App::new("wm-session-agent")
-        .version(&crate_version!()[..])
+        .version(&crate_version!())
         .author("Ben Boeckel <mathstuf@gmail.com>")
         .about("Listens for logind's Lock and Unlock signals")
         .arg(Arg::with_name("CONFIG")
@@ -95,7 +95,7 @@ fn try_main() -> Result<(), Box<Error>> {
     ];
 
     let match_str = format!("type='signal',interface='org.freedesktop.login1.Session',path='{}'", spath);
-    try!(conn.add_match(&match_str[..]));
+    try!(conn.add_match(&match_str));
 
     conn.iter(100).fold(ctx, |inner_ctx, item| {
         match_signal(inner_ctx, &cbs, item)
