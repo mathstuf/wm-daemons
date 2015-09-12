@@ -20,6 +20,3 @@ git = "https://github.com/filipegoncalves/rust-config.git"
 [lib]
 name = "wm_daemons"
 path = "src/lib.rs"
-
-[[bin]]
-name = "wm-session-agent"
