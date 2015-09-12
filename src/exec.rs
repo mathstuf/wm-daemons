@@ -27,10 +27,10 @@ fn make_command_vec(vec: &Vec<Value>) -> Result<CommandLine, String> {
 
     let mut prog_args = vec![];
     for v in vec {
-        match v {
-            &Value::Svalue(ref sv) =>
-                match sv {
-                    &ScalarValue::Str(ref s) => prog_args.push(s),
+        match *v {
+            Value::Svalue(ref sv) =>
+                match *sv {
+                    ScalarValue::Str(ref s) => prog_args.push(s),
                     _ => return Err(format!("non-string program value")),
                 },
             _ => return Err(format!("non-string program value")),
@@ -58,11 +58,11 @@ fn make_command_str(string: &String) -> Result<CommandLine, String> {
 
 pub fn read_command_line_from_config(conf: &Config, path: &str) -> Option<CommandLine> {
     conf.lookup(path).and_then(|val| {
-        let cmd_line = match val {
-            &Value::Array(ref a) => make_command_vec(a),
-            &Value::Svalue(ref sv) =>
-                match sv {
-                    &ScalarValue::Str(ref s) => make_command_str(s),
+        let cmd_line = match *val {
+            Value::Array(ref a) => make_command_vec(a),
+            Value::Svalue(ref sv) =>
+                match *sv {
+                    ScalarValue::Str(ref s) => make_command_str(s),
                     _ => Err(format!("unsupported type for {}", path)),
                 },
             _ => Err(format!("unsupported type for {}", path)),
