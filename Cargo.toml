@@ -1,6 +1,6 @@
 [project]
 name = "wm-daemons"
-version = "0.0.7"
+version = "0.1.0"
 authors = ["Ben Boeckel <mathstuf@gmail.com>"]
 license = "BSD"
 description = """
