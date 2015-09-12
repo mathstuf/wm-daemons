@@ -52,8 +52,8 @@ pub fn match_signal<Ctx>(ctx: Ctx, map: &CallbackMap<Ctx>, item: ConnectionItem)
 
 pub fn make_full_dbus_info(path: &str, object: &str, member: &str) -> DBusInfo {
     DBusInfo {
-        path: Some(path.to_string()),
-        object: Some(object.to_string()),
-        member: Some(member.to_string()),
+        path: Some(path.to_owned()),
+        object: Some(object.to_owned()),
+        member: Some(member.to_owned()),
     }
 }

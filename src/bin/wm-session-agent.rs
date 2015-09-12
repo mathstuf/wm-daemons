@@ -68,7 +68,7 @@ fn try_main() -> Result<(), Box<Error>> {
     };
 
     let sid = match matches.value_of("SESSION") {
-        Some(sid) => sid.to_string(),
+        Some(sid) => sid.to_owned(),
         None => match var("LOGIND_SESSION_ID") {
             Ok(sid) => sid,
             Err(err) => {
@@ -85,12 +85,12 @@ fn try_main() -> Result<(), Box<Error>> {
         (DBusInfo {
             path: None,
             object: None,
-            member: Some("Lock".to_string()),
+            member: Some("Lock".to_owned()),
         }, handle_signal),
         (DBusInfo {
             path: None,
             object: None,
-            member: Some("Unlock".to_string()),
+            member: Some("Unlock".to_owned()),
         }, handle_signal),
     ];
 
