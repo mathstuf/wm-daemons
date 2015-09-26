@@ -12,13 +12,12 @@ pub struct CommandLine {
 
 fn expand_home(path: &String) -> String {
     if path.starts_with("~/") {
-        match home_dir() {
-            Some(home) => format!("{}/{}", home.display(), &path[2..]),
-            _ => path.clone(),
+        if let Some(home) = home_dir() {
+            return format!("{}/{}", home.display(), &path[2..])
         }
-    } else {
-        path.clone()
     }
+
+    path.clone()
 }
 
 fn make_command_vec(vec: &Vec<Value>) -> Result<CommandLine, String> {
