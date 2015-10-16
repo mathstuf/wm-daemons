@@ -9,11 +9,8 @@ Daemons to handle the modern D-Bus service desktop.
 
 [dependencies]
 clap = "~1.2.0"
-#config = "0.1.1"
+config = "~0.1.2"
 xdg-basedir = "~0.2.0"
-
-[dependencies.config]
-git = "https://github.com/filipegoncalves/rust-config.git"
 
 [lib]
 name = "wm_daemons"
